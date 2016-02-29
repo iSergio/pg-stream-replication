@@ -242,7 +242,7 @@ if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
     for ((i = 0; i < ${#slave_hosts[@]}; i++)); do
         printf "Begin copy cluster to ${slave_hosts[$i]}\n"
         su $user -c 'ssh '$user'@'${slave_hosts[$i]}' pg_basebackup -U '$user' -D '${slave_data_dirs[$i]}' -h '${master_hosts[$host_n]}' -P'
-        echo -e "standby_mode = on\nprimary_conninfo = 'host=${master_hosts[$host_n]} port=5432 user=$user'\nrestore_command = 'cp $wal_dir/%f %p'\narchive_cleanup_command = 'pg_archivecleanup $wal_dir  %r'" | su $user -c 'ssh '$user'@'${slave_hosts[$i]}' "cat > '${slave_data_dirs[$i]}'/recovery.conf"'
+        echo -e "standby_mode = on\nprimary_conninfo = 'host=${master_hosts[$host_n]} port=5432 user=$user'\nrestore_command = 'cp $wal_dir/%f %p'\narchive_cleanup_command = 'pg_archivecleanup $wal_dir  %r'\ntrigger_file='/tmp/postgresql.trigger'" | su $user -c 'ssh '$user'@'${slave_hosts[$i]}' "cat > '${slave_data_dirs[$i]}'/recovery.conf"'
         echo "hot_standby = on" | su $user -c 'ssh '$user'@'${slave_hosts[$i]}' "cat >> '${slave_postgresql_confs[$i]}'"'
         su $user -c 'ssh -t '$user'@'$slave_host' pg_ctl start -D '${slave_data_dirs[$i]}' -s -w'
     done
